@@ -1,0 +1,15 @@
+time = (1:length(maskSND))/Sd.freqBase;
+
+
+for iFrequency = 1:26;
+    e_MaskSnd = [];
+    for iTrial = 1:S.nrTrials
+        if ~o.timing.audMaskTime(iTrial, iFrequency) == 0
+            nrPlayed  = nrPlayed + 1;
+            time2trig = o.timing.triggerOnsets(1, iTrial) - o.timing.audMaskTime(iTrial, iFrequency);
+            samp2trig = find((time > time2trig - 0.5) & (time < time2trig + 1.5));
+            e_MaskSnd(nrPlayed, :) = maskSND(iFrequency, samp2trig);
+        end
+    end
+    me_MaskSnd(iFrequency,:) = mean(e_MaskSnd,1);
+end

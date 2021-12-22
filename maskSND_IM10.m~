@@ -1,0 +1,86 @@
+%% Generates 3 seconds masking sounds. 1 for each trial.
+
+% subjects ID
+SubID = Sub6;
+% duration of mask in seconds
+durationMask = 3;
+% duration of beep in seconds
+durationBeep = 0.3;
+nTrials   = 250;
+nSessions = 4;
+% for all sessions
+for iSession=1:nSessions
+    % for all trials
+    for iTrial = 1:nTrials;
+        Sd.durMask = durationMask;
+        Sd.durBeep = durationBeep;
+        Sd.fs      = 48000;
+        Sd.AMmask  = 1;
+        Sd.meanSOA = 1000;
+        % generate Mask
+        [IM SOAt] = IMsound_IM10(Sd.durMask, Sd.durBeep, Sd.fs, Sd.AMmask, Sd.meanSOA);
+        maskSND = IM;
+        % save
+        eval(['save /Users/anette/Documents/MATLAB/Experiment2/Tones/' SubID '/S' num2str(iSession) '/maskSND_T' num2str(iTrial) ' maskSND'])
+    end
+end
+
+
+%% Generate Target tones
+% AM modulation (= 1), no AM modulation (= 0)
+AMmod = 1;
+
+% target frequencies (adopted from Gutschalk et al.)
+% freqs    = [489, 699, 1000, 1430, 2045, 2924];
+generateFreq;
+freqs  = ftar;
+nFreqs = length(freqs);
+
+% auditory sampling frequency
+freqBase = 48000;
+
+
+for iFreq = 1:nFreqs
+    
+%     % MASK GENERATION
+%     for iRep = 1: 100;
+%         % [IM SOAt] = IMsound(durMask, durBeep, fs, AMmask, tarFreq, meanSOA, nrMaskFreq)
+%         [IMtemp SOA] = IMsound(4,0.25,44800,AMmod, freqs(iFreq), 1000, 13);
+%         IMtemp       = sum(IMtemp,1);
+%         mySoundMask  = IMtemp/max(abs(IMtemp));
+%         Sd.IM(iFreq,iRep,:) = mySoundMask;
+%         Sd.SOA{iFreq,iRep}  = SOA;
+%     end
+    
+    % TARGET GENERATION
+    samplesBeep = freqBase * 0.3;
+    time        = (0:samplesBeep-1) / freqBase; % time vector
+    fc          = freqs(iFreq); % base frequency
+    fcAM        = 40; % 40 Hz AM modulated
+    beep        = sin(2*pi*fc*time);
+    AM          = (1-cos(2*pi*fcAM*time))/2;
+    if AMmod == 1
+        beep = beep.*AM;
+    end
+    Sd.beep(iFreq,:) = beep;
+end
+
+Sd.Tarfreqs = freqs;
+Sd.freqBase = freqBase;
+
+
+
+% save sound information
+eval(['save /Users/anette/Documents/MATLAB/Experiment2/Tones/' SubID '/S' num2str(iSession) '/SNDinfo Sd'])
+
+
+
+
+
+% % for timing test
+% for iSession=1:4
+%     for iTrial = 1:250;
+%         maskSND = zeros(26,144000);
+%         eval(['save /Users/anette/Documents/MATLAB/Experiment2/Tones/TimingTest/S' num2str(iSession) '/maskSND_T' num2str(iTrial) ' maskSND'])
+%     end
+% end
